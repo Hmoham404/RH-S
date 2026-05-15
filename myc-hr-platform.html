@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail RH - MYC Beauty Innovation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F3E5AB;
+            --red: #C41E3A;
+            --red-light: #E8A2A8;
+            --white: #FFFFFF;
+            --bg-light: #F4F7F6;
+            --text-main: #2C3E50;
+            --text-muted: #7F8C8D;
+            --border-color: #E0E6ED;
+            
+            --status-identified: #2ECC71;
+            --status-interim: #F39C12;
+            --status-progress: #3498DB;
+            --status-recruit: #E74C3C;
+            
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 24px rgba(0,0,0,0.12);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 { font-weight: 700; }
+        
+        /* Navbar */
+        nav {
+            background: var(--white);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span.gold { color: var(--gold); }
+        .logo span.red { color: var(--red); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links li {
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        .nav-links li:hover, .nav-links li.active {
+            color: var(--red);
+        }
+
+        .nav-links li::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--red);
+            transition: var(--transition);
+        }
+
+        .nav-links li.active::after {
+            width: 100%;
+        }
+
+        /* Main Container */
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95)), url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="%23f4f7f6"/><circle cx="50" cy="50" r="40" stroke="%23D4AF37" stroke-width="2" fill="none" opacity="0.1"/></svg>');
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid var(--red);
+        }
+
+        .badge-premium {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--gold), #FFF8DC);
+            color: #8B6508;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(45deg, var(--red), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* KPI Dashboard */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .kpi-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-card:nth-child(1) { border-bottom-color: var(--gold); }
+        .kpi-card:nth-child(2) { border-bottom-color: var(--red); }
+        .kpi-card:nth-child(3) { border-bottom-color: #3498DB; }
+        .kpi-card:nth-child(4) { border-bottom-color: #2ECC71; }
+        .kpi-card:nth-child(5) { border-bottom-color: #9B59B6; }
+        .kpi-card:nth-child(6) { border-bottom-color: #E67E22; }
+
+        .kpi-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .kpi-card:nth-child(1) .kpi-icon { color: var(--gold); }
+        .kpi-card:nth-child(2) .kpi-icon { color: var(--red); }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Organigramme */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+            padding: 2rem 0;
+        }
+
+        .org-level {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        /* Connecting lines logic */
+        .org-level::before {
+            content: '';
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            width: 2px;
+            height: 1.5rem;
+            background: var(--border-color);
+        }
+
+        .org-level:first-child::before {
+            display: none;
+        }
+
+        .org-departments {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            position: relative;
+        }
+
+        .org-departments::before {
+            content: '';
+            position: absolute;
+            top: -1.5rem;
+            left: calc(10% + 110px); /* Approx center of first card */
+            right: calc(10% + 110px); /* Approx center of last card */
+            height: 2px;
+            background: var(--border-color);
+        }
+
+        .org-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .org-card::before {
+            content: '';
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            width: 2px;
+            height: 1.5rem;
+            background: var(--border-color);
+        }
+        
+        .org-card.ceo::before { display: none; }
+
+        .org-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--gold);
+        }
+
+        .org-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--gold);
+            border: 2px solid var(--border-color);
+        }
+
+        .org-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .org-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .status-identified { background: var(--status-identified); }
+        .status-interim { background: var(--status-interim); color: #fff; }
+        .status-progress { background: var(--status-progress); }
+        .status-recruit { background: var(--status-recruit); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            padding: 2.5rem;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-lg);
+            border-top: 6px solid var(--gold);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover { color: var(--red); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--red);
+            border: 3px solid var(--gold-light);
+        }
+
+        .modal-info h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .modal-info p {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .modal-body .detail-row {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .modal-body .detail-label {
+            width: 140px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .modal-body .detail-value {
+            flex: 1;
+            color: var(--text-muted);
+        }
+
+        /* Departments */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .dept-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .dept-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-5px);
+        }
+
+        .dept-card:nth-child(4n+1):hover { border-left-color: var(--gold); }
+        .dept-card:nth-child(4n+2):hover { border-left-color: var(--red); }
+        .dept-card:nth-child(4n+3):hover { border-left-color: #3498DB; }
+        .dept-card:nth-child(4n+4):hover { border-left-color: #2ECC71; }
+
+        .dept-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dept-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dept-icon {
+            color: var(--gold);
+            font-size: 1.2rem;
+        }
+
+        .dept-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dept-stat {
+            background: var(--bg-light);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .dept-list {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .dept-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .dept-list li::before {
+            content: '\\f105';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--red);
+        }
+
+        /* Documents Library */
+        .doc-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .doc-search {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .doc-search input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .doc-search input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .doc-search i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .doc-select {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: var(--white);
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .doc-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doc-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+        }
+
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .doc-icon {
+            font-size: 2rem;
+        }
+
+        .icon-pdf { color: #E74C3C; }
+        .icon-word { color: #2980B9; }
+        .icon-excel { color: #27AE60; }
+
+        .doc-ref {
+            font-size: 0.75rem;
+            background: var(--bg-light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .doc-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .doc-category {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.1);
+            color: #8B6508;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .doc-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 0.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        .btn-view:hover { background: #E0E6ED; }
+
+        .btn-download {
+            background: rgba(196, 30, 58, 0.1);
+            color: var(--red);
+        }
+
+        .btn-download:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+            .hero h1 { font-size: 2rem; }
+            .org-departments::before { display: none; }
+            .org-card::before { display: none; }
+            .org-level::before { display: none; }
+            .org-level { flex-direction: column; align-items: center; }
+            .modal-content { width: 95%; padding: 1.5rem; }
+            .modal-body .detail-row { flex-direction: column; }
+            .modal-body .detail-label { margin-bottom: 0.2rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-leaf gold"></i>
+            <span>MYC <span class="gold">Beauty</span> <span class="red">Innovation</span></span>
+        </div>
+        <ul class="nav-links">
+            <li class="active" onclick="switchTab('accueil')">Accueil & KPI</li>
+            <li onclick="switchTab('organigramme')">Organigramme</li>
+            <li onclick="switchTab('departements')">Départements</li>
+            <li onclick="switchTab('documents')">Documents RH</li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        
+        <!-- SECTION 1: Accueil & KPI -->
+        <div id="accueil" class="section active">
+            <div class="hero">
+                <div class="badge-premium"><i class="fa-solid fa-star"></i> Plateforme de gestion RH complète</div>
+                <h1>Ressources Humaines <br><span>Usine de Tunisie</span></h1>
+                <p>Bienvenue sur le portail RH de MYC Beauty Innovation. Retrouvez ici toute la structure organisationnelle, la gestion du personnel et la bibliothèque centralisée des documents RH.</p>
+            </div>
+
+            <h2 style="margin-bottom: 1.5rem; color: var(--text-main);"><i class="fa-solid fa-chart-pie" style="color: var(--gold); margin-right: 10px;"></i>Tableau de Bord KPI</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="kpi-value">150+</div>
+                    <div class="kpi-label">Collaborateurs</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-building"></i></div>
+                    <div class="kpi-value">8</div>
+                    <div class="kpi-label">Départements</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-key"></i></div>
+                    <div class="kpi-value">20+</div>
+                    <div class="kpi-label">Postes Clés</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-certificate"></i></div>
+                    <div class="kpi-value">100%</div>
+                    <div class="kpi-label">Conformité ISO</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-file-contract"></i></div>
+                    <div class="kpi-value" id="kpi-doc-count">15</div>
+                    <div class="kpi-label">Documents RH</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="kpi-value">3</div>
+                    <div class="kpi-label">Postes à Recruter</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Organigramme -->
+        <div id="organigramme" class="section">
+            <h2 style="margin-bottom: 2rem; text-align: center; color: var(--text-main);">
+                <i class="fa-solid fa-sitemap" style="color: var(--gold); margin-right: 10px;"></i>
+                Structure Organisationnelle
+            </h2>
+
+            <div class="org-chart">
+                <!-- Top Level -->
+                <div class="org-level">
+                    <div class="org-card ceo" onclick="openModal('sami')">
+                        <div class="org-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                        <div class="org-name">Sami LADJIMI</div>
+                        <div class="org-title">Directeur Général</div>
+                        <div class="status-badge status-identified">Identifié</div>
+                    </div>
+                </div>
+
+                <!-- Departments Level -->
+                <div class="org-level org-departments">
+                    <div class="org-card" onclick="openModal('supply')">
+                        <div class="org-avatar"><i class="fa-solid fa-truck-fast"></i></div>
+                        <div class="org-name">À définir</div>
+                        <div class="org-title">Directeur Supply Chain</div>
+                        <div class="status-badge status-recruit">À recruter</div>
+                    </div>
+                    
+                    <div class="org-card" onclick="openModal('prod')">
+                        <div class="org-avatar"><i class="fa-solid fa-industry"></i></div>
+                        <div class="org-name">Ahmed B.</div>
+                        <div class="org-title">Directeur Production</div>
+                        <div class="status-badge status-identified">Identifié</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('tech')">
+                        <div class="org-avatar"><i class="fa-solid fa-wrench"></i></div>
+                        <div class="org-name">Mounir T.</div>
+                        <div class="org-title">Directeur Technical</div>
+                        <div class="status-badge status-interim">Intérim</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('qualite')">
+                        <div class="org-avatar"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div class="org-name">Sara M.</div>
+                        <div class="org-title">Directrice Qualité</div>
+                        <div class="status-badge status-identified">Identifié</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('finance')">
+                        <div class="org-avatar"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="org-name">Karim L.</div>
+                        <div class="org-title">Directeur Finance</div>
+                        <div class="status-badge status-progress">En cours</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('rh')">
+                        <div class="org-avatar"><i class="fa-solid fa-users-gear"></i></div>
+                        <div class="org-name">Leïla K.</div>
+                        <div class="org-title">Responsable RH</div>
+                        <div class="status-badge status-identified">Identifié</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('admin')">
+                        <div class="org-avatar"><i class="fa-solid fa-building-user"></i></div>
+                        <div class="org-name">Fatma Z.</div>
+                        <div class="org-title">Responsable Admin.</div>
+                        <div class="status-badge status-identified">Identifié</div>
+                    </div>
+
+                    <div class="org-card" onclick="openModal('sales')">
+                        <div class="org-avatar"><i class="fa-solid fa-handshake"></i></div>
+                        <div class="org-name">Candidat X</div>
+                        <div class="org-title">Directeur Sales</div>
+                        <div class="status-badge status-progress">En cours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: Départements -->
+        <div id="departements" class="section">
+            <h2 style="margin-bottom: 2rem; color: var(--text-main);">
+                <i class="fa-solid fa-layer-group" style="color: var(--gold); margin-right: 10px;"></i>
+                Structure des Départements
+            </h2>
+
+            <div class="dept-grid">
+                <!-- Supply Chain -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-truck-fast dept-icon"></i> Supply Chain</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~25 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-recruit);"><i class="fa-solid fa-circle"></i> Recrutement</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Approvisionnement & Achats</li>
+                        <li>Planning de production</li>
+                        <li>Warehouse / Magasin</li>
+                        <li>Logistique & Export</li>
+                    </ul>
+                </div>
+
+                <!-- Production -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-industry dept-icon"></i> Production</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~80 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-identified);"><i class="fa-solid fa-circle"></i> Actif</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Injection Plastique</li>
+                        <li>Spray / Laquage</li>
+                        <li>Métallisation</li>
+                        <li>Assemblage final</li>
+                    </ul>
+                </div>
+
+                <!-- Technical -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-wrench dept-icon"></i> Technical</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~15 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-interim);"><i class="fa-solid fa-circle"></i> Intérim</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Maintenance préventive</li>
+                        <li>Engineering & Moules</li>
+                        <li>Automation</li>
+                        <li>Amélioration process</li>
+                    </ul>
+                </div>
+
+                <!-- Qualité -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-clipboard-check dept-icon"></i> Qualité</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~12 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-identified);"><i class="fa-solid fa-circle"></i> Actif</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>IQC (Contrôle Réception)</li>
+                        <li>IPQC (Contrôle Process)</li>
+                        <li>FQC / OQC (Contrôle Final)</li>
+                        <li>Laboratoire & Métrologie</li>
+                    </ul>
+                </div>
+
+                <!-- Finance -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-chart-line dept-icon"></i> Finance & IT</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~5 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-progress);"><i class="fa-solid fa-circle"></i> En dev.</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Comptabilité Générale</li>
+                        <li>Contrôle de gestion / Costing</li>
+                        <li>Trésorerie</li>
+                        <li>Support IT Local</li>
+                    </ul>
+                </div>
+
+                <!-- RH -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-users-gear dept-icon"></i> Ressources Humaines</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~4 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-identified);"><i class="fa-solid fa-circle"></i> Actif</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Administration du personnel</li>
+                        <li>Recrutement & Formation</li>
+                        <li>Sécurité & Santé (HSE)</li>
+                        <li>Conformité SA8000</li>
+                    </ul>
+                </div>
+
+                <!-- Administration -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-building-user dept-icon"></i> Administration</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~3 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-identified);"><i class="fa-solid fa-circle"></i> Actif</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Support Direction Générale</li>
+                        <li>Coordination site</li>
+                        <li>Services généraux</li>
+                        <li>Accueil & Sécurité site</li>
+                    </ul>
+                </div>
+
+                <!-- Sales -->
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-title"><i class="fa-solid fa-handshake dept-icon"></i> Sales</div>
+                    </div>
+                    <div class="dept-stats">
+                        <span class="dept-stat"><i class="fa-solid fa-users"></i> ~6 Coll.</span>
+                        <span class="dept-stat" style="color: var(--status-progress);"><i class="fa-solid fa-circle"></i> En dev.</span>
+                    </div>
+                    <ul class="dept-list">
+                        <li>Développement Commercial</li>
+                        <li>Relation Client B2B</li>
+                        <li>Marketing Produit</li>
+                        <li>Suivi des projets clients</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: Documents RH -->
+        <div id="documents" class="section">
+            <h2 style="margin-bottom: 2rem; color: var(--text-main);">
+                <i class="fa-solid fa-folder-open" style="color: var(--gold); margin-right: 10px;"></i>
+                Bibliothèque des Documents RH
+            </h2>
+
+            <div class="doc-filters">
+                <div class="doc-search">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un document, une référence...">
+                </div>
+                <select class="doc-select" id="catFilter">
+                    <option value="all">Toutes les catégories</option>
+                    <option value="formation">Formation</option>
+                    <option value="procedures">Procédures RH</option>
+                    <option value="sa8000">SA8000 / RSE</option>
+                    <option value="admin">Administration</option>
+                </select>
+                <select class="doc-select" id="typeFilter">
+                    <option value="all">Tous les formats</option>
+                    <option value="pdf">PDF</option>
+                    <option value="word">Word</option>
+                    <option value="excel">Excel</option>
+                </select>
+            </div>
+
+            <div class="doc-grid" id="docContainer">
+                <!-- Documents generated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="profileModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal(null, true)"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <div class="modal-avatar" id="modalIcon"><i class="fa-solid fa-user"></i></div>
+                <div class="modal-info">
+                    <h2 id="modalName">Nom du Collaborateur</h2>
+                    <p id="modalTitle">Titre du poste</p>
+                    <span class="status-badge" id="modalStatus" style="margin-top: 5px;">Statut</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="detail-row">
+                    <div class="detail-label">Département</div>
+                    <div class="detail-value" id="modalDept">Département concerné</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Responsabilités</div>
+                    <div class="detail-value" id="modalResp">Description détaillée des responsabilités et missions principales du collaborateur au sein de MYC Beauty Innovation.</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Équipe rattachée</div>
+                    <div class="detail-value" id="modalTeam">Noms ou nombre de collaborateurs sous sa responsabilité.</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Contact</div>
+                    <div class="detail-value"><i class="fa-solid fa-envelope" style="color: var(--red); margin-right: 5px;"></i> contact@myc-beauty.com</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Update nav styling
+            document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all sections, show target
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Profile Data
+        const profiles = {
+            'sami': {
+                name: 'Sami LADJIMI', title: 'Directeur Général', dept: 'Direction Générale',
+                status: 'Identifié', statusClass: 'status-identified', icon: 'fa-user-tie',
+                resp: 'Pilotage stratégique de l\'usine, gestion des P&L, représentation légale, et supervision globale des opérations en Tunisie.',
+                team: 'Comité de Direction (7 personnes)'
+            },
+            'supply': {
+                name: 'À définir', title: 'Directeur Supply Chain', dept: 'Supply Chain',
+                status: 'À recruter', statusClass: 'status-recruit', icon: 'fa-truck-fast',
+                resp: 'Gestion complète des flux logistiques, achats, approvisionnements, stockage et expéditions. Optimisation des coûts logistiques.',
+                team: '~25 collaborateurs'
+            },
+            'prod': {
+                name: 'Ahmed B.', title: 'Directeur Production', dept: 'Production',
+                status: 'Identifié', statusClass: 'status-identified', icon: 'fa-industry',
+                resp: 'Garantir la réalisation du planning de production dans le respect des standards de qualité, coûts et délais. Supervision des ateliers (Injection, Laquage, Métallisation, Assemblage).',
+                team: '~80 collaborateurs'
+            },
+            'tech': {
+                name: 'Mounir T.', title: 'Directeur Technical', dept: 'Technical',
+                status: 'Intérim', statusClass: 'status-interim', icon: 'fa-wrench',
+                resp: 'Gestion de la maintenance industrielle, de l\'outillage (moules), de l\'ingénierie process et des projets d\'amélioration continue.',
+                team: '~15 collaborateurs'
+            },
+            'qualite': {
+                name: 'Sara M.', title: 'Directrice Qualité', dept: 'Qualité',
+                status: 'Identifié', statusClass: 'status-identified', icon: 'fa-clipboard-check',
+                resp: 'Mise en place et maintien du Système de Management de la Qualité (SMQ). Supervision des contrôles IQC, IPQC, OQC et gestion des réclamations clients.',
+                team: '~12 collaborateurs'
+            },
+            'finance': {
+                name: 'Karim L.', title: 'Directeur Finance', dept: 'Finance & IT',
+                status: 'En cours', statusClass: 'status-progress', icon: 'fa-chart-line',
+                resp: 'Gestion financière, comptable et fiscale. Élaboration des budgets, reporting, et pilotage des systèmes d\'information.',
+                team: '~5 collaborateurs'
+            },
+            'rh': {
+                name: 'Leïla K.', title: 'Responsable RH', dept: 'Ressources Humaines',
+                status: 'Identifié', statusClass: 'status-identified', icon: 'fa-users-gear',
+                resp: 'Développement du capital humain, recrutement, formation, administration du personnel, paie, et garantie du respect de la conformité sociale (SA8000).',
+                team: '~4 collaborateurs'
+            },
+            'admin': {
+                name: 'Fatma Z.', title: 'Responsable Administration', dept: 'Administration',
+                status: 'Identifié', statusClass: 'status-identified', icon: 'fa-building-user',
+                resp: 'Gestion des services généraux, accueil, sécurité physique du site, et support administratif à la Direction Générale.',
+                team: '~3 collaborateurs'
+            },
+            'sales': {
+                name: 'Candidat X', title: 'Directeur Sales', dept: 'Sales',
+                status: 'En cours', statusClass: 'status-progress', icon: 'fa-handshake',
+                resp: 'Développement du portefeuille clients B2B, gestion de la relation commerciale, et coordination avec la maison mère pour les projets globaux.',
+                team: '~6 collaborateurs'
+            }
+        };
+
+        // Modal Logic
+        const modal = document.getElementById('profileModal');
+        
+        function openModal(profileId) {
+            const data = profiles[profileId];
+            if(!data) return;
+
+            document.getElementById('modalName').textContent = data.name;
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalDept').textContent = data.dept;
+            document.getElementById('modalResp').textContent = data.resp;
+            document.getElementById('modalTeam').textContent = data.team;
+            
+            const statusEl = document.getElementById('modalStatus');
+            statusEl.textContent = data.status;
+            statusEl.className = 'status-badge ' + data.statusClass;
+
+            const iconEl = document.getElementById('modalIcon');
+            iconEl.innerHTML = `<i class="fa-solid ${data.icon}"></i>`;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        function closeModal(event, force = false) {
+            if (force || event.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Documents Data
+        const documents = [
+            { ref: 'FRM-HR-001', title: 'Demande de formation', cat: 'formation', type: 'word', icon: 'fa-file-word icon-word' },
+            { ref: 'REP-HR-002', title: 'Rapport de formation', cat: 'formation', type: 'word', icon: 'fa-file-word icon-word' },
+            { ref: 'REG-HR-003', title: 'Registre de formation', cat: 'formation', type: 'excel', icon: 'fa-file-excel icon-excel' },
+            { ref: 'EVAL-HR-004', title: 'Évaluation pratique', cat: 'formation', type: 'word', icon: 'fa-file-word icon-word' },
+            { ref: 'TST-HR-005', title: 'Test d’intégration', cat: 'formation', type: 'word', icon: 'fa-file-word icon-word' },
+            { ref: 'PRO-HR-006', title: 'Procédure de gestion de formation', cat: 'procedures', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'PRO-HR-007', title: 'Procédure responsabilités', cat: 'procedures', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'CTRL-HR-008', title: 'Contrôle ressources humaines', cat: 'admin', type: 'excel', icon: 'fa-file-excel icon-excel' },
+            { ref: 'FRM-HR-009', title: 'Accord de confidentialité', cat: 'admin', type: 'word', icon: 'fa-file-word icon-word' },
+            { ref: 'PRO-HR-010', title: 'Administration entrée employés', cat: 'admin', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'PRO-HR-011', title: 'Gestion formation pré-emploi', cat: 'formation', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'POL-SA-001', title: 'Élection représentants', cat: 'sa8000', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'POL-SA-002', title: 'Interdiction travail forcé', cat: 'sa8000', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'POL-SA-003', title: 'Responsabilité sociale', cat: 'sa8000', type: 'pdf', icon: 'fa-file-pdf icon-pdf' },
+            { ref: 'POL-SA-004', title: 'Protection enfants', cat: 'sa8000', type: 'pdf', icon: 'fa-file-pdf icon-pdf' }
+        ];
+
+        // Render Documents
+        const docContainer = document.getElementById('docContainer');
+        const searchInput = document.getElementById('searchInput');
+        const catFilter = document.getElementById('catFilter');
+        const typeFilter = document.getElementById('typeFilter');
+
+        function renderDocs() {
+            const search = searchInput.value.toLowerCase();
+            const cat = catFilter.value;
+            const type = typeFilter.value;
+
+            docContainer.innerHTML = '';
+            let count = 0;
+
+            documents.forEach(doc => {
+                const matchSearch = doc.title.toLowerCase().includes(search) || doc.ref.toLowerCase().includes(search);
+                const matchCat = cat === 'all' || doc.cat === cat;
+                const matchType = type === 'all' || doc.type === type;
+
+                if (matchSearch && matchCat && matchType) {
+                    count++;
+                    const catLabel = catFilter.querySelector(`option[value="${doc.cat}"]`)?.textContent || doc.cat;
+                    
+                    const html = `
+                        <div class="doc-card">
+                            <div class="doc-header">
+                                <i class="fa-solid ${doc.icon} doc-icon"></i>
+                                <span class="doc-ref">${doc.ref}</span>
+                            </div>
+                            <h3 class="doc-title">${doc.title}</h3>
+                            <span class="doc-category">${catLabel}</span>
+                            <div class="doc-actions">
+                                <button class="btn btn-view"><i class="fa-solid fa-eye"></i> Voir</button>
+                                <button class="btn btn-download"><i class="fa-solid fa-download"></i> Télécharger</button>
+                            </div>
+                        </div>
+                    `;
+                    docContainer.insertAdjacentHTML('beforeend', html);
+                }
+            });
+
+            if (count === 0) {
+                docContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Aucun document ne correspond à vos critères de recherche.</p>';
+            }
+        }
+
+        // Event Listeners for Filters
+        searchInput.addEventListener('input', renderDocs);
+        catFilter.addEventListener('change', renderDocs);
+        typeFilter.addEventListener('change', renderDocs);
+
+        // Initial render
+        renderDocs();
+
+    </script>
+</body>
+</html>
