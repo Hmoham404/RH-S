@@ -1,0 +1,138 @@
+/* Modern Org Chart Styles */
+.org-chart-modern {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  overflow-x: auto;
+}
+
+.org-node-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.org-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.org-children {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+  position: relative;
+}
+
+/* Lines for the tree */
+.org-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 2rem;
+  background: var(--border-color);
+}
+
+.org-node-container:not(:only-child)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-color);
+}
+
+.org-node-container:first-child::before {
+  left: 50%;
+}
+
+.org-node-container:last-child::before {
+  right: 50%;
+}
+
+.org-node-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 1rem;
+  background: var(--border-color);
+  transform: translateY(-100%);
+}
+
+.org-node-container:first-child.ceo::after {
+  display: none;
+}
+
+.expand-btn {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -12px;
+  z-index: 3;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+}
+
+.expand-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.org-card {
+  width: 220px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.org-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--red);
+}
+
+.org-card.ceo {
+  border-color: var(--red);
+  background: #fff9f9;
+}
+
+.org-info {
+  text-align: left;
+}
+
+.org-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.org-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
