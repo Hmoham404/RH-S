@@ -16,20 +16,35 @@ function App() {
   const [activeTab, setActiveTab] = useState('accueil');
 
   useEffect(() => {
+    let isMounted = true;
+    
+    // Add a timeout to prevent infinite loading if Supabase is unreachable
+    const timeoutId = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3000);
+
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
-        setSession(session);
-        setLoading(false);
+        if (isMounted) {
+          setSession(session);
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       })
       .catch(() => {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      if (isMounted) setSession(session);
     });
 
     return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
       if (subscription) subscription.unsubscribe();
     };
   }, []);
