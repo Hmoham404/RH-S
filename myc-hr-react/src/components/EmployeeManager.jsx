@@ -28,7 +28,7 @@ const EmployeeManager = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [importData, setImportData] = useState([]);
-  const [importColumns, setImportColumns] = useState([]); // toutes les colonnes du fichier Excel
+  const [importColumns, setImportColumns] = useState([]); // [{ label, key }]
 
   useEffect(() => {
     fetchEmployees();
@@ -43,6 +43,50 @@ const EmployeeManager = () => {
     
     if (!error) setEmployees(data);
     setLoading(false);
+  };
+
+  const normalizeKey = (value) => {
+    if (!value) return '';
+    const normalized = value
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    const aliases = {
+      matr: 'matricule',
+      prenom: 'prenom',
+      date_de_naissance: 'date_naissance',
+      periode_d_essai: 'periode_essai',
+      date_de_depart: 'date_depart',
+      date_d_embauche: 'date_embauche',
+      type_du_contrat: 'type_du_contrat',
+      date_de_confirmation_prevu_5_mois: 'date_confirmation_prevu_5_mois',
+      message_d_alerte: 'message_alerte',
+      actif_inactif: 'actif_inactif',
+    };
+    return aliases[normalized] || normalized;
+  };
+
+  const makeUniqueKey = (key, used) => {
+    let nextKey = key || 'col';
+    let suffix = 1;
+    while (used.has(nextKey)) {
+      suffix += 1;
+      nextKey = `${key}_${suffix}`;
+    }
+    used.add(nextKey);
+    return nextKey;
+  };
+
+  const pickValue = (row, keys) => {
+    for (const key of keys) {
+      if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {
+        return String(row[key]).trim();
+      }
+    }
+    return '';
   };
 
   const handleFileUpload = (e) => {
@@ -73,31 +117,28 @@ const EmployeeManager = () => {
           return;
         }
 
-        // --- Garder TOUTES les colonnes du fichier Excel (mode BI) ---
-        // Extraire les noms de colonnes depuis la première ligne
-        const allColumns = Object.keys(data[0]);
-        setImportColumns(allColumns);
-
-        // Auto-détection des colonnes DB connues (insensible à la casse)
-        const findCol = (row, aliases) => {
-          for (const alias of aliases) {
-            const key = Object.keys(row).find(k => k.trim().toLowerCase() === alias.toLowerCase());
-            if (key !== undefined) return String(row[key] ?? '').trim();
-          }
-          return '';
-        };
+        const rawColumns = Object.keys(data[0]);
+        const usedKeys = new Set();
+        const columns = rawColumns.map((label) => {
+          const normalized = normalizeKey(label);
+          const key = makeUniqueKey(normalized || 'col', usedKeys);
+          return { label, key };
+        });
+        setImportColumns(columns);
 
         const prepared = data.map((rawRow, idx) => {
-          // On copie toutes les colonnes originales
-          const fullRow = { ...rawRow };
-          // On ajoute/écrase les champs DB avec auto-détection
-          fullRow._matricule = findCol(rawRow, ['matricule','mat','n° matricule','num matricule']);
-          fullRow._nom       = findCol(rawRow, ['nom','name','last name','nom de famille']);
-          fullRow._prenom    = findCol(rawRow, ['prenom','prénom','first name','prénoms']);
-          fullRow._cin       = findCol(rawRow, ['cin','n° cin','cin/passport','num cin']);
-          fullRow._service   = findCol(rawRow, ['service','département','department']) || 'Production';
-          fullRow._statut    = findCol(rawRow, ['statut','status','état']) || 'Actif';
-          fullRow._id = idx;
+          const fullRow = { __id: idx };
+          columns.forEach((col) => {
+            fullRow[col.key] = rawRow[col.label] ?? '';
+          });
+
+          fullRow.matricule = pickValue(fullRow, ['matricule']);
+          fullRow.nom = pickValue(fullRow, ['nom']);
+          fullRow.prenom = pickValue(fullRow, ['prenom']);
+          fullRow.cin = pickValue(fullRow, ['cin']);
+          fullRow.service = pickValue(fullRow, ['service', 'departement', 'department']) || 'Production';
+          fullRow.statut = pickValue(fullRow, ['statut', 'actif_inactif']) || 'Actif';
+
           return fullRow;
         });
 
@@ -118,33 +159,44 @@ const EmployeeManager = () => {
   const updateImportRow = (idx, field, value) => {
     const newData = [...importData];
     newData[idx][field] = value;
+    newData[idx].matricule = pickValue(newData[idx], ['matricule']);
+    newData[idx].nom = pickValue(newData[idx], ['nom']);
+    newData[idx].prenom = pickValue(newData[idx], ['prenom']);
+    newData[idx].cin = pickValue(newData[idx], ['cin']);
+    newData[idx].service = pickValue(newData[idx], ['service', 'departement', 'department']) || 'Production';
+    newData[idx].statut = pickValue(newData[idx], ['statut', 'actif_inactif']) || 'Actif';
     setImportData(newData);
   };
 
   const confirmImport = async () => {
     setLoading(true);
-    // Mapper les champs _xxx vers les colonnes DB, filtrer les invalides
+    const existingMatricules = new Set(
+      employees
+        .map((emp) => (emp.matricule || '').toString().trim())
+        .filter(Boolean)
+    );
     const validRows = importData
-      .filter(r => r._matricule && r._cin)
-      .map(r => ({
-        matricule: r._matricule,
-        nom:       r._nom,
-        prenom:    r._prenom,
-        cin:       r._cin,
-        service:   r._service,
-        statut:    r._statut,
-      }));
+      .filter(r => r.matricule)
+      .filter(r => !existingMatricules.has(String(r.matricule).trim()))
+      .map((row) => {
+        const cleaned = {};
+        Object.entries(row).forEach(([key, value]) => {
+          if (key === '__id') return;
+          cleaned[key] = value ?? '';
+        });
+        return cleaned;
+      });
 
     if (validRows.length === 0) {
-      alert("Aucune ligne valide (Matricule et CIN obligatoires). Vérifiez les colonnes détectées.");
+      alert("Aucune ligne valide a importer (Matricule obligatoire, et pas de doublons). Vérifiez les colonnes détectées.");
       setLoading(false);
       return;
     }
 
-    const { error } = await supabase.from('employees').upsert(validRows, { onConflict: 'matricule' });
+    const { error } = await supabase.from('employees').insert(validRows);
     
     if (!error) {
-      alert(`✅ ${validRows.length} employé(s) importé(s) / mis à jour avec succès.`);
+      alert(`✅ ${validRows.length} employé(s) importé(s) avec succès.`);
       fetchEmployees();
       setView('list');
       setImportColumns([]);
@@ -165,6 +217,19 @@ const EmployeeManager = () => {
     setLoading(true);
     const formData = new FormData(e.target);
     const employeeData = Object.fromEntries(formData.entries());
+    const matriculeValue = (employeeData.matricule || '').toString().trim();
+    const existingEmployee = employees.find(
+      (emp) => (emp.matricule || '').toString().trim() === matriculeValue
+    );
+    const isEditing = Boolean(employeeData.id);
+
+    if (!isEditing && existingEmployee) {
+      alert('Matricule deja existant. Veuillez modifier l employe existant.');
+      setSelectedEmployee(existingEmployee);
+      setView('form');
+      setLoading(false);
+      return;
+    }
     
     // Conversion checkbox
     employeeData.valide = formData.get('valide') === 'true';
@@ -184,9 +249,27 @@ const EmployeeManager = () => {
     const name = (emp.nom || '') + (emp.prenom || '');
     const mat = (emp.matricule || '');
     const matchesSearch = (name + mat).toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || emp.statut === statusFilter;
+    const statusValue = emp.statut ?? emp.actif_inactif ?? '';
+    const matchesStatus = statusFilter === 'all' || statusValue === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalEmployees = employees.length;
+  const activeCount = employees.filter(e => (e.statut || e.actif_inactif || '').toString().toLowerCase().includes('actif')).length;
+  const inactiveCount = employees.filter(e => (e.statut || e.actif_inactif || '').toString().toLowerCase().includes('inactif')).length;
+  const probationCount = employees.filter(e => (e.statut || '').toString().toLowerCase().includes('essai')).length;
+
+  const hiddenKeys = new Set(['id', 'created_at', 'updated_at']);
+  const fallbackColumns = employees.length
+    ? Object.keys(employees[0]).filter((key) => !hiddenKeys.has(key))
+    : ['matricule', 'nom', 'prenom', 'cin', 'service', 'statut'];
+
+  const listColumns = importColumns.length
+    ? importColumns
+    : fallbackColumns.map((key) => ({
+        key,
+        label: key.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase()),
+      }));
 
   return (
     <div className="section active employee-manager">
@@ -208,6 +291,25 @@ const EmployeeManager = () => {
 
       {view === 'list' && (
         <div className="animate-fade-in">
+          <div className="stats-grid">
+            <div className="stats-card">
+              <span>Total Employes</span>
+              <strong>{totalEmployees}</strong>
+            </div>
+            <div className="stats-card active">
+              <span>Actifs</span>
+              <strong>{activeCount}</strong>
+            </div>
+            <div className="stats-card inactive">
+              <span>Inactifs</span>
+              <strong>{inactiveCount}</strong>
+            </div>
+            <div className="stats-card probation">
+              <span>Periode d'essai</span>
+              <strong>{probationCount}</strong>
+            </div>
+          </div>
+
           <div className="list-controls">
             <div className="search-box">
               <Search size={20} />
@@ -231,36 +333,107 @@ const EmployeeManager = () => {
             </div>
           </div>
 
-          <div className="employee-table-container">
-            <table className="employee-table">
-              <thead>
-                <tr>
-                  <th>Matricule</th>
-                  <th>Nom & Prénom</th>
-                  <th>CIN</th>
-                  <th>Service</th>
-                  <th>Statut</th>
-                  <th>Validé</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEmployees.map(emp => (
-                  <tr key={emp.id}>
-                    <td><strong>{emp.matricule}</strong></td>
-                    <td>{emp.nom} {emp.prenom}</td>
-                    <td>{emp.cin}</td>
-                    <td><span className="badge-service">{emp.service}</span></td>
-                    <td><span className={`status-pill ${emp.statut?.toLowerCase().replace(/\s/g, '-')}`}>{emp.statut}</span></td>
-                    <td>{emp.valide ? <CheckCircle size={18} color="#2ecc71" /> : <AlertTriangle size={18} color="#f1c40f" />}</td>
-                    <td className="actions-cell">
-                      <button onClick={() => { setSelectedEmployee(emp); setView('form'); }} title="Modifier"><Edit2 size={16} /></button>
-                      <button onClick={() => deleteEmployee(emp.id)} className="delete" title="Supprimer"><Trash2 size={16} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="list-layout">
+            <div className="list-main">
+              <div className="employee-table-container">
+                <table className="employee-table">
+                  <thead>
+                    <tr>
+                      {listColumns.map((col) => (
+                        <th key={col.key}>{col.label}</th>
+                      ))}
+                      <th>Validé</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredEmployees.map(emp => (
+                      <tr key={emp.id}>
+                        {listColumns.map((col) => {
+                          const value = emp[col.key];
+                          if (col.key === 'statut' || col.key === 'actif_inactif') {
+                            const status = value || '';
+                            const statusClass = status
+                              .toString()
+                              .toLowerCase()
+                              .normalize('NFD')
+                              .replace(/[\u0300-\u036f]/g, '')
+                              .replace(/[^a-z0-9]+/g, '-');
+                            return (
+                              <td key={col.key}>
+                                <span className={`status-pill ${statusClass}`}>{status}</span>
+                              </td>
+                            );
+                          }
+                          return (
+                            <td key={col.key}>
+                              {col.key === 'matricule' ? <strong>{value}</strong> : value}
+                            </td>
+                          );
+                        })}
+                        <td>{emp.valide ? <CheckCircle size={18} color="#2ecc71" /> : <AlertTriangle size={18} color="#f1c40f" />}</td>
+                        <td className="actions-cell">
+                          <button onClick={() => { setSelectedEmployee(emp); setView('form'); }} title="Modifier"><Edit2 size={16} /></button>
+                          <button onClick={() => deleteEmployee(emp.id)} className="delete" title="Supprimer"><Trash2 size={16} /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <aside className="list-side">
+              <div className="panel-card">
+                <div className="panel-header">
+                  <div>
+                    <h3>Import direct</h3>
+                    <p>Importer uniquement les matricules non existants.</p>
+                  </div>
+                  <span className="panel-badge">{importData.length} lignes</span>
+                </div>
+                <div className="panel-actions">
+                  <label className="btn-primary" style={{ cursor: 'pointer' }}>
+                    <Upload size={16} /> Choisir un fichier
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx, .xls, .ods" />
+                  </label>
+                  <button className="btn-secondary" onClick={() => setView('import')} disabled={importData.length === 0}>
+                    Previsualiser
+                  </button>
+                  <button className="btn-confirm" onClick={confirmImport} disabled={importData.length === 0}>
+                    Importer maintenant
+                  </button>
+                </div>
+                <div className="panel-meta">
+                  <span>{importColumns.length} colonnes detectees</span>
+                  <span>Matricule requis, CIN optionnel</span>
+                </div>
+              </div>
+
+              <div className="panel-card">
+                <div className="panel-header">
+                  <div>
+                    <h3>Ajout manuel</h3>
+                    <p>Si le matricule existe, utilisez la modification.</p>
+                  </div>
+                </div>
+                <form onSubmit={saveEmployee} className="quick-form">
+                  <input name="matricule" placeholder="Matricule *" required />
+                  <input name="nom" placeholder="Nom *" required />
+                  <input name="prenom" placeholder="Prenom *" required />
+                  <input name="cin" placeholder="CIN (optionnel)" />
+                  <input name="service" placeholder="Service" />
+                  <select name="statut" defaultValue="Actif">
+                    <option>Actif</option>
+                    <option>Inactif</option>
+                    <option>Période d'essai</option>
+                    <option>Confirmé</option>
+                    <option>Départ</option>
+                  </select>
+                  <button type="submit" className="btn-save">Enregistrer</button>
+                </form>
+              </div>
+            </aside>
           </div>
         </div>
       )}
@@ -284,72 +457,25 @@ const EmployeeManager = () => {
             <table className="preview-table">
               <thead>
                 <tr>
-                  <th>Matricule *</th>
-                  <th>Nom *</th>
-                  <th>Prénom *</th>
-                  <th>CIN *</th>
-                  <th>Service</th>
-                  <th>Statut</th>
+                  {importColumns.map((col) => (
+                    <th key={col.key}>{col.label}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {importData.map((row, idx) => (
-                  <tr key={idx} className={(!row.matricule || !row.cin) ? 'row-warning' : ''}>
-                    <td>
-                        <input 
-                            type="text" 
-                            className="inline-edit" 
-                            value={row.matricule} 
-                            onChange={(e) => updateImportRow(idx, 'matricule', e.target.value)}
-                            placeholder="Requis"
+                  <tr key={idx} className={!row.matricule ? 'row-warning' : ''}>
+                    {importColumns.map((col) => (
+                      <td key={col.key}>
+                        <input
+                          type="text"
+                          className="inline-edit"
+                          value={row[col.key] ?? ''}
+                          onChange={(e) => updateImportRow(idx, col.key, e.target.value)}
+                          placeholder={col.key === 'matricule' ? 'Requis' : ''}
                         />
-                    </td>
-                    <td>
-                        <input 
-                            type="text" 
-                            className="inline-edit" 
-                            value={row.nom} 
-                            onChange={(e) => updateImportRow(idx, 'nom', e.target.value)}
-                        />
-                    </td>
-                    <td>
-                        <input 
-                            type="text" 
-                            className="inline-edit" 
-                            value={row.prenom} 
-                            onChange={(e) => updateImportRow(idx, 'prenom', e.target.value)}
-                        />
-                    </td>
-                    <td>
-                        <input 
-                            type="text" 
-                            className="inline-edit" 
-                            value={row.cin} 
-                            onChange={(e) => updateImportRow(idx, 'cin', e.target.value)}
-                            placeholder="Requis"
-                        />
-                    </td>
-                    <td>
-                        <input 
-                            type="text" 
-                            className="inline-edit" 
-                            value={row.service} 
-                            onChange={(e) => updateImportRow(idx, 'service', e.target.value)}
-                        />
-                    </td>
-                    <td>
-                        <select 
-                            className="inline-edit" 
-                            value={row.statut} 
-                            onChange={(e) => updateImportRow(idx, 'statut', e.target.value)}
-                        >
-                            <option>Actif</option>
-                            <option>Inactif</option>
-                            <option>Période d'essai</option>
-                            <option>Confirmé</option>
-                            <option>Départ</option>
-                        </select>
-                    </td>
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -429,25 +555,57 @@ const EmployeeManager = () => {
         .manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .header-actions { display: flex; gap: 1rem; }
         
-        .list-controls { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stats-card { background: white; border-radius: 16px; border: 1px solid var(--border-color); padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow-sm); }
+        .stats-card span { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stats-card strong { font-size: 1.4rem; color: var(--text-main); }
+        .stats-card.active { border-color: #c8e6c9; background: #f1f8f1; }
+        .stats-card.inactive { border-color: #ffcdd2; background: #fff5f5; }
+        .stats-card.probation { border-color: #ffe0b2; background: #fff8e1; }
+
+        .list-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+        .list-main { min-width: 0; }
+        .list-side { display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 90px; }
+        .list-controls { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
         .search-box { flex: 1; display: flex; align-items: center; gap: 10px; background: white; padding: 0 1rem; border-radius: 12px; border: 1px solid var(--border-color); }
         .search-box input { border: none; padding: 0.8rem 0; width: 100%; outline: none; }
         .filter-box { display: flex; align-items: center; gap: 10px; background: white; padding: 0 1rem; border-radius: 12px; border: 1px solid var(--border-color); }
         .filter-box select { border: none; padding: 0.8rem 0; outline: none; background: transparent; }
 
-        .employee-table-container { background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
-        .employee-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .employee-table-container { background: white; border-radius: 20px; overflow: auto; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+        .employee-table { width: 100%; min-width: 1100px; border-collapse: collapse; text-align: left; }
         .employee-table th { background: #fafafa; padding: 1rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
         .employee-table td { padding: 1rem; border-bottom: 1px solid var(--bg-light); font-size: 0.9rem; }
         
         .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .status-pill.actif { background: #e8f5e9; color: #2e7d32; }
+        .status-pill.inactif { background: #ffebee; color: #c62828; }
+        .status-pill.actif-inactif { background: #ffe8e8; color: #b71c1c; }
         .status-pill.confirmé { background: #e3f2fd; color: #1565c0; }
+        .status-pill.confirme { background: #e3f2fd; color: #1565c0; }
         .status-pill.départ { background: #ffebee; color: #c62828; }
+        .status-pill.depart { background: #ffebee; color: #c62828; }
         .status-pill.période-d-essai { background: #fff8e1; color: #f57f17; }
+        .status-pill.periode-d-essai { background: #fff8e1; color: #f57f17; }
 
         .actions-cell { display: flex; gap: 10px; }
         .actions-cell button { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 5px; border-radius: 5px; }
+
+        .panel-card { background: white; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); padding: 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+        .panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .panel-header h3 { margin: 0; font-size: 1.05rem; }
+        .panel-header p { margin: 0.3rem 0 0; color: var(--text-muted); font-size: 0.85rem; }
+        .panel-badge { background: #fff5f5; color: var(--red); font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; }
+        .panel-actions { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
+        .panel-meta { display: flex; flex-direction: column; gap: 6px; color: var(--text-muted); font-size: 0.8rem; }
+        .quick-form { display: grid; gap: 0.6rem; }
+        .quick-form input,
+        .quick-form select { padding: 0.6rem 0.7rem; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.85rem; }
+
+        @media (max-width: 1100px) {
+          .list-layout { grid-template-columns: 1fr; }
+          .list-side { position: static; }
+        }
 
         /* Import Preview */
         .import-preview { background: white; border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; }

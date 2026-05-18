@@ -142,8 +142,6 @@
   background: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   position: relative;
 }
 
@@ -172,7 +170,7 @@
 /* Preview Panel */
 .file-preview-panel {
   width: 100%;
-  max-width: 600px;
+  max-width: none;
   padding: 2rem;
 }
 
@@ -270,3 +268,140 @@
 }
 
 .btn-action-danger:hover { background: #fff5f5; }
+
+.node-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.node-toggle:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.node-row.selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  border-left: 3px solid #3b82f6;
+}
+
+.explorer-main-content {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  padding: 24px;
+  height: 100%;
+}
+
+.explorer-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explorer-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 260px);
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.explorer-guide::-webkit-scrollbar { width: 5px; }
+.explorer-guide::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.floating-error {
+  position: absolute;
+  bottom: 5rem;
+  background: #fff5f5;
+  color: var(--red);
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  border: 1px solid #fee2e2;
+}
+
+/* Guide Panel */
+.guide-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.guide-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.guide-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.guide-files { padding-bottom: 8px; }
+
+.guide-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.guide-file-list::-webkit-scrollbar { width: 5px; }
+.guide-file-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.guide-file-item {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.guide-file-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.guide-file-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.guide-empty {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 1100px) {
+  .explorer-main-content {
+    grid-template-columns: 1fr;
+  }
+  .explorer-guide { max-height: none; }
+}
